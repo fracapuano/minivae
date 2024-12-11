@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "miniscvae"
+version = "0.1.0"
+description = "a minimalist pytorch-based implementation of scVAE"
+authors = ["Francesco Capuano <francesco_capuano@aol.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+torch = "^2.5.1"
+numpy = "^2.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
