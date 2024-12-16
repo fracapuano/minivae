@@ -1,0 +1,11 @@
+project: "scRNA-VAE"
+architecture: "GMVAE"
+dataset: "scRNA-2k"
+input_dim: 32738
+latent_dim: 100
+nclusters: 9
+hidden_dims: [256, 128, 64]
+learning_rate: 3e-3
+batch_size: 32
+epochs: 20  # not interested in extensive training
+reconstruction_dist: "poisson"
