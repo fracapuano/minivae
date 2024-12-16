@@ -25,19 +25,19 @@ class VAELoss:
         reconstruction_dist, mu, logvar = outputs
 
         # 1. Empirical likelihood of x under the reconstruction distribution
-        likelihood = reconstruction_dist.log_prob(x).sum(dim=1).mean()
+        log_likelihood = reconstruction_dist.log_prob(x).sum(dim=1).mean()
 
         # KL divergence has closed-form expression versus standard normal prior
         kl_div = (0.5 * torch.sum(mu**2 + logvar.exp() - logvar - 1, dim=1)).mean()
         
         # ELBO, with warmup
-        elbo = likelihood - (self.kl_weight * warm_up_weight * kl_div)
+        elbo = log_likelihood - (self.kl_weight * warm_up_weight * kl_div)
         # VAE are maximized using the surrogate ELBO-objective
         loss = -elbo
 
         info = {
             "elbo": elbo,
-            "likelihood": likelihood,
+            "log_likelihood": log_likelihood,
             "kl_div": kl_div
         }
 
