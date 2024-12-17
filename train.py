@@ -127,35 +127,24 @@ def get_model(config):
     Factory function to create model instances based on config.
     
     Args:
-        config (dict): Configuration dictionary containing model parameters
-            Required fields:
-            - architecture: "VAE" or "GMVAE"
-            - input_dim: Input dimension
-            - latent_dim: Latent space dimension
-            - hidden_dims: List of hidden layer dimensions
-            - reconstruction_dist: Type of reconstruction distribution
-            For GMVAE only:
-            - nclusters: Number of Gaussian components
-            
-    Returns:
-        torch.nn.Module: Instantiated model (VAE or GMVAE)
+        config (wandb.Config): Configuration object containing model parameters
     """
-    architecture = config["architecture"].upper()
+    architecture = config.architecture.upper()
     
     if architecture == "VAE":
         model = VAE(
-            input_dim=config["input_dim"],
-            latent_dim=config["latent_dim"],
-            hidden_dims=config["hidden_dims"],
-            reconstruction_dist=config["reconstruction_dist"]
+            input_dim=config.input_dim,
+            latent_dim=config.latent_dim,
+            hidden_dims=config.hidden_dims,
+            reconstruction_dist=config.reconstruction_dist
         )
     elif architecture == "GMVAE":
         model = GMVAE(
-            input_dim=config["input_dim"],
-            latent_dim=config["latent_dim"],
-            n_components=config["n_components"],
-            hidden_dims=config["hidden_dims"],
-            reconstruction_dist=config["reconstruction_dist"]
+            input_dim=config.input_dim,
+            latent_dim=config.latent_dim,
+            n_components=config.n_components,
+            hidden_dims=config.hidden_dims,
+            reconstruction_dist=config.reconstruction_dist
         )
     else:
         raise ValueError(f"Unknown architecture: {architecture}. Choose 'VAE' or 'GMVAE'")
@@ -163,15 +152,13 @@ def get_model(config):
     return model
 
 def get_loss(config):
-    """Routes the current configuration dictionary chosen to a given loss function, specific for a problem"""
-    architecture = config["architecture"].upper()
+    """Routes the current configuration object to a given loss function"""
+    architecture = config.architecture.upper()
     
     if architecture == "VAE":
         return VAELoss()
-    
     elif architecture == "GMVAE":
         return GMVAELoss()
-
     else:
         raise ValueError(f"Unknown architecture: {architecture}. Choose 'VAE' or 'GMVAE'")
 
@@ -184,7 +171,9 @@ def main():
         project=config['project'],
         config=config
     )
-    
+    # when sweeping, configuration is updated by wandb
+    config = wandb.config
+
     # Create a unique model path using the wandb run ID
     model_dir = "models"
     os.makedirs(model_dir, exist_ok=True)
@@ -200,13 +189,13 @@ def main():
     model = get_model(config).to(device)
 
     # Create data loaders
-    train_loader = create_dataloader("train", batch_size=config['batch_size'])
-    val_loader = create_dataloader("validation", batch_size=config['batch_size'])
+    train_loader = create_dataloader("train", batch_size=config.batch_size)
+    val_loader = create_dataloader("validation", batch_size=config.batch_size)
     
     # Initialize optimizer and loss
     optimizer = torch.optim.Adam(
         model.parameters(), 
-        lr=config['learning_rate']
+        lr=config.learning_rate
     )
     
     loss_fn = get_loss(config)
@@ -214,7 +203,7 @@ def main():
     # Training loop
     best_val_loss = float('inf')
     
-    for epoch in range(config['epochs']):
+    for epoch in range(config.epochs):
         # Compute warm-up weight (increasing linear schedule over 10 epochs)
         warm_up_weight = min(1.0, (epoch + 1) / 10)
         
