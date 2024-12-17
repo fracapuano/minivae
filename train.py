@@ -86,11 +86,11 @@ def validate(model, val_loader, loss_fn, device):
             x = batch.to(device)
             
             # Forward pass
-            reconstruction_dist, mu, logvar = model(x)
+            outputs = model(x)
             
             # Compute loss
             loss, metrics = loss_fn(
-                outputs=(reconstruction_dist, mu, logvar),
+                outputs=outputs,
                 x=x
             )
 
