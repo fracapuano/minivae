@@ -151,21 +151,65 @@ def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(description='Train VAE or GMVAE model')
     parser.add_argument(
-        '--model', 
+        '--architecture', 
         type=str, 
-        choices=['vae', 'gmvae'],
-        required=False,
-        help='Model type to train (vae or gmvae)'
+        choices=['VAE', 'GMVAE'],
+        help='Model architecture to train'
     )
+    parser.add_argument(
+        '--batch_size', 
+        type=int,
+        help='Batch size for training'
+    )
+    parser.add_argument(
+        '--epochs', 
+        type=int,
+        help='Number of training epochs'
+    )
+    parser.add_argument(
+        '--latent_dim', 
+        type=int,
+        help='Dimension of latent space'
+    )
+    parser.add_argument(
+        '--learning_rate', 
+        type=float,
+        help='Learning rate'
+    )
+    parser.add_argument(
+        '--n_components', 
+        type=int,
+        help='Number of components (for GMVAE only)'
+    )
+    parser.add_argument(
+        '--reconstruction_dist', 
+        type=str,
+        help='Reconstruction distribution type'
+    )
+    
     return parser.parse_args()
 
 def main():
     # Parse command line arguments
     args = parse_args()
     
-    # Load configuration based on model type
-    config_file = f'configs/train_{args.model}.yaml'
+    # Load base configuration
+    config_file = f'configs/train_{args.architecture.lower()}.yaml'
     config = load_config(config_file)
+    
+    # Update config with sweep parameters if provided
+    if args.batch_size is not None:
+        config['batch_size'] = args.batch_size
+    if args.epochs is not None:
+        config['epochs'] = args.epochs
+    if args.latent_dim is not None:
+        config['latent_dim'] = args.latent_dim
+    if args.learning_rate is not None:
+        config['learning_rate'] = args.learning_rate
+    if args.n_components is not None:
+        config['n_components'] = args.n_components
+    if args.reconstruction_dist is not None:
+        config['reconstruction_dist'] = args.reconstruction_dist
     
     # Initialize wandb with loaded config
     run = wandb.init(
