@@ -84,8 +84,8 @@ def validate(model, val_loader, loss_fn, device):
     with torch.no_grad():
         for batch in val_loader:
             batch = batch.to(device)
-            reconstruction_dist, mu, logvar = model(batch)
-            loss = loss_fn(batch, reconstruction_dist, mu, logvar)
+            outputs = model(batch)
+            loss, _ = loss_fn(outputs)
             total_loss += loss.item()
             num_batches += 1
     
