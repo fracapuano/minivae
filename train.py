@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from datasets import load_dataset
 from tqdm import tqdm
 import yaml
+import os
 
 from vae import VAE
 from gmvae import GMVAE
@@ -179,11 +180,16 @@ def main():
     config = load_config('config.yaml')
     
     # Initialize wandb with loaded config
-    wandb.init(
+    run = wandb.init(
         project=config['project'],
         config=config
     )
     
+    # Create a unique model path using the wandb run ID
+    model_dir = "models"
+    os.makedirs(model_dir, exist_ok=True)
+    model_path = os.path.join(model_dir, f"best_model_{run.id}.pt")
+
     # Set device
     device = torch.device(
         "cuda" if torch.cuda.is_available() 
@@ -229,11 +235,11 @@ def main():
             "warm_up_weight": warm_up_weight
         })
         
-        # Save best model
+        # Save best model with unique identifier
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            torch.save(model.state_dict(), "best_model.pt")
-            wandb.save("best_model.pt")
+            torch.save(model.state_dict(), model_path)
+            wandb.save(model_path)
         
         print(
             f"Epoch {epoch}: Train Loss = {train_loss:.4f}, Val Loss = {val_loss:.4f}"
