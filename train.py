@@ -204,12 +204,12 @@ def main():
     best_val_loss = float('inf')
     
     for epoch in range(config.epochs):
-        # Compute warm-up weight (increasing linear schedule over 10 epochs)
-        warm_up_weight = min(1.0, (epoch + 1) / 10)
+        # Compute warm-up weight (linearly increasing over training epochs)
+        warm_up_weight = min(1.0, (epoch + 1) / config.epochs)
         
         # Train
         train_loss = train_epoch(
-            model, train_loader, optimizer, loss_fn, 
+            model, train_loader, optimizer, loss_fn,
             device, warm_up_weight
         )
         
