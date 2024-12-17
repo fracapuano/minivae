@@ -88,9 +88,13 @@ class NegativeBinomialHead(DecoderHead):
 
         # Ensure mu and alpha are positive
         mu = F.softplus(mu)
-        alpha = F.softplus(alpha)
+        alpha = F.softplus(alpha) + 1e-6  # Add small constant to prevent division by zero
 
-        return NegativeBinomial(total_count=alpha, probs=mu/(mu + alpha))
+        # Clamp the probability to [0, 1-eps] where eps is a small constant
+        eps = 1e-6
+        probs = torch.clamp(mu/(mu + alpha), 0.0, 1.0 - eps)
+
+        return NegativeBinomial(total_count=alpha, probs=probs)
 
 class ZeroInflatedPoissonHead(DecoderHead):
     def __init__(self, hidden_dims, output_dim):
