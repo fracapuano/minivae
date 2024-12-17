@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from decoder import decoder_heads
+from minivae.models.decoder import decoder_heads
 
 
 class VAE(nn.Module):

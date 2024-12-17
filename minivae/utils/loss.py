@@ -102,7 +102,7 @@ class GMVAELoss:
 
 # Example usage
 if __name__ == "__main__":
-    from gmvae import GMVAE
+    from minivae.models.gmvae import GMVAE
     # Dummy data
     batch_size, input_dim = 32, 10
     x = torch.randn(batch_size, input_dim)

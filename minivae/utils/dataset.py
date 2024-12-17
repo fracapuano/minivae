@@ -1,3 +1,10 @@
+"""
+Function to obtain a Hugging Face Dataset of the data presented in the original scVAE paper, 
+and openly shared in the PBMC dataset.
+
+This script subsampled the original dataset, limiting the sequencing data to 2k cells per category
+"""
+
 import os
 import tarfile
 import scipy.io
@@ -165,6 +172,6 @@ def main(data_dir, push_to_hub="fracapuano/scRNA"):
 
 if __name__ == "__main__":
     main(
-        data_dir="data/original",
+        data_dir="../../data/original",
         push_to_hub="fracapuano/scRNA-2k"
     )

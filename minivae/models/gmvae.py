@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from vae import VAE
+from minivae.models.vae import VAE
 
 
 class GMVAE(VAE):

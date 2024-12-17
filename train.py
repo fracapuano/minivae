@@ -6,10 +6,12 @@ from tqdm import tqdm
 import yaml
 import os
 
-from vae import VAE
-from gmvae import GMVAE
-
-from loss import VAELoss, GMVAELoss
+from minivae.models.vae import VAE
+from minivae.models.gmvae import GMVAE
+from minivae.utils.loss import (
+    VAELoss, 
+    GMVAELoss
+)
 
 def collate_fn(batch):
     # Extract sequences and convert to tensor
