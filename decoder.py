@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Normal, Poisson, NegativeBinomial
+from distributions import ZeroInflatedDistribution
 
 
 class DecoderHead(nn.Module):
@@ -91,9 +92,30 @@ class NegativeBinomialHead(DecoderHead):
 
         return NegativeBinomial(total_count=alpha, probs=mu/(mu + alpha))
 
+class ZeroInflatedPoissonHead(DecoderHead):
+    def __init__(self, hidden_dims, output_dim):
+        super().__init__(hidden_dims, output_dim)
+        self.base_distribution = PoissonHead(hidden_dims, output_dim)
+        self.rho = nn.Parameter(torch.tensor([0.5]))
+        
+    def forward(self, x):
+        vanilla_distr = self.base_distribution(x)
+        return ZeroInflatedDistribution(vanilla_distr, self.rho)
+
+class ZeroInflatedNegativeBinomialHead(DecoderHead):
+    def __init__(self, hidden_dims, output_dim):
+        super().__init__(hidden_dims, output_dim)
+        self.base_distribution = NegativeBinomialHead(hidden_dims, output_dim)
+        self.rho = nn.Parameter(torch.tensor([0.5]))
+        
+    def forward(self, x):
+        vanilla_distr = self.base_distribution(x)
+        return ZeroInflatedDistribution(vanilla_distr, self.rho)
 
 decoder_heads = {
     "gaussian": GaussianHead,
     "poisson": PoissonHead,
-    "negative_binomial": NegativeBinomialHead
-    }
+    "negative_binomial": NegativeBinomialHead,
+    "zip": ZeroInflatedPoissonHead,
+    "zi_nb": ZeroInflatedNegativeBinomialHead
+}
