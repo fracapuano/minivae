@@ -3,8 +3,8 @@ architecture: "VAE"
 dataset: "scRNA-2k"
 input_dim: 32738
 latent_dim: 100
-hidden_dims: [256, 128]
+hidden_dims: [256, 128, 64]
 learning_rate: 3.0e-4
 batch_size: 64
-epochs: 20  # not interested in training
-reconstruction_dist: "poisson"
+epochs: 5  # not interested in extensive training
+reconstruction_dist: "negative_binomial"
