@@ -5,6 +5,7 @@ from datasets import load_dataset
 from tqdm import tqdm
 import yaml
 import os
+import argparse
 
 from vae import VAE
 from gmvae import GMVAE
@@ -146,9 +147,25 @@ def get_loss(config):
     else:
         raise ValueError(f"Unknown architecture: {architecture}. Choose 'VAE' or 'GMVAE'")
 
+def parse_args():
+    """Parse command line arguments"""
+    parser = argparse.ArgumentParser(description='Train VAE or GMVAE model')
+    parser.add_argument(
+        '--model', 
+        type=str, 
+        choices=['vae', 'gmvae'],
+        required=True,
+        help='Model type to train (vae or gmvae)'
+    )
+    return parser.parse_args()
+
 def main():
-    # Load configuration
-    config = load_config('configs/train_vae.yaml')
+    # Parse command line arguments
+    args = parse_args()
+    
+    # Load configuration based on model type
+    config_file = f'configs/train_{args.model}.yaml'
+    config = load_config(config_file)
     
     # Initialize wandb with loaded config
     run = wandb.init(
