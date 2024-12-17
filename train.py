@@ -21,7 +21,7 @@ def collate_fn(batch):
 def create_dataloader(split, batch_size=32):
     """Creates a DataLoader for a specific split of the scRNA dataset"""
     dataset = load_dataset(
-        "fracapuano/scRNA-2k", split=split, streaming=True).\
+        "fracapuano/scRNA-2k", split=split).\
         rename_column("gene_expression", "sequence")
 
     return DataLoader(
@@ -82,39 +82,16 @@ def validate(model, val_loader, loss_fn, device):
     num_batches = 0
     
     with torch.no_grad():
-        for batch in tqdm(val_loader, desc="Validation"):
-            x = batch.to(device)
-            
-            # Forward pass
-            outputs = model(x)
-            
-            # Compute loss
-            loss, metrics = loss_fn(
-                outputs=outputs,
-                x=x
-            )
-
-            kl_mixtures = {
-            "train/kl_z": metrics.get("kl_z", -1),
-            "train/kl_y": metrics.get("kl_y", -1)
-            }
-            kl_mixtures = {
-                k: v.item() if isinstance(v, torch.Tensor) else v for k,v in kl_mixtures.items()
-            }
-            
-            # Log metrics
-            wandb.log({
-                "val/loss": loss.item(),
-                "val/elbo": metrics["elbo"].item(),
-                "val/log_likelihood": metrics["log_likelihood"].item(),
-                "val/kl_div": metrics["kl_div"].item()
-            } | kl_mixtures
-            )
-            
+        for batch in val_loader:
+            batch = batch.to(device)
+            reconstruction_dist, mu, logvar = model(batch)
+            loss = loss_fn(batch, reconstruction_dist, mu, logvar)
             total_loss += loss.item()
             num_batches += 1
     
-    return total_loss / num_batches
+    # Calculate average loss
+    avg_val_loss = total_loss / num_batches
+    return avg_val_loss
 
 def load_config(config_path):
     """Load configuration from YAML file"""
@@ -164,7 +141,7 @@ def get_loss(config):
 
 def main():
     # Load configuration
-    config = load_config('config.yaml')
+    config = load_config('configs/train_vae.yaml')
     
     # Initialize wandb with loaded config
     run = wandb.init(
@@ -213,10 +190,10 @@ def main():
             device, warm_up_weight
         )
         
-        # Validate
+        # Validate and get average loss
         val_loss = validate(model, val_loader, loss_fn, device)
         
-        # Log epoch metrics
+        # Log aggregated metrics
         wandb.log({
             "epoch": epoch,
             "train/epoch_loss": train_loss,
