@@ -154,7 +154,7 @@ def parse_args():
         '--model', 
         type=str, 
         choices=['vae', 'gmvae'],
-        required=True,
+        required=False,
         help='Model type to train (vae or gmvae)'
     )
     return parser.parse_args()
