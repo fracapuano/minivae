@@ -4,7 +4,7 @@ dataset: "scRNA-2k"
 input_dim: 32738
 latent_dim: 100
 n_components: 9
-hidden_dims: [256, 128]
+hidden_dims: [256, 128, 64]
 learning_rate: 3.0e-4
 batch_size: 64
 epochs: 5 # not interested in extensive training
