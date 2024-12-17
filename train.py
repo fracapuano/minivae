@@ -78,20 +78,27 @@ def train_epoch(model, train_loader, optimizer, loss_fn, device, warm_up_weight=
 
 def validate(model, val_loader, loss_fn, device):
     model.eval()
-    total_loss = 0
+    total_likelihood = 0
+    total_kl_div = 0
     num_batches = 0
     
     with torch.no_grad():
         for batch in val_loader:
             batch = batch.to(device)
             outputs = model(batch)
-            loss, _ = loss_fn(outputs)
-            total_loss += loss.item()
+            _, metrics = loss_fn(outputs, batch)
+            
+            # Extract individual components
+            total_likelihood += metrics["log_likelihood"].item()
+            total_kl_div += metrics["kl_div"].item()
+            
             num_batches += 1
     
-    # Calculate average loss
-    avg_val_loss = total_loss / num_batches
-    return avg_val_loss
+    # Calculate averages
+    avg_likelihood = total_likelihood / num_batches
+    avg_kl_div = total_kl_div / num_batches
+    
+    return avg_likelihood, avg_kl_div
 
 def load_config(config_path):
     """Load configuration from YAML file"""
@@ -190,14 +197,19 @@ def main():
             device, warm_up_weight
         )
         
-        # Validate and get average loss
-        val_loss = validate(model, val_loader, loss_fn, device)
+        # Validate and get average loss components
+        val_likelihood, val_kl_div = validate(model, val_loader, loss_fn, device)
+        
+        # Compute validation loss (matching training loss computation)
+        val_loss = -(val_likelihood - (warm_up_weight * val_kl_div))
         
         # Log aggregated metrics
         wandb.log({
             "epoch": epoch,
             "train/epoch_loss": train_loss,
             "val/epoch_loss": val_loss,
+            "val/log_likelihood": val_likelihood,
+            "val/kl_div": val_kl_div,
             "warm_up_weight": warm_up_weight
         })
         
