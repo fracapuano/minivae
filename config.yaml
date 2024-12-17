@@ -1,0 +1,11 @@
+project: "scRNA-debug"
+architecture: "GMVAE"
+dataset: "scRNA-2k"
+input_dim: 32738
+latent_dim: 100
+n_components: 9
+hidden_dims: [256, 128, 64]
+learning_rate: 3.0e-3
+batch_size: 32
+epochs: 1
+reconstruction_dist: "zip"
