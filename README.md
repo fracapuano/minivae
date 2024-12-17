@@ -7,6 +7,27 @@ We open-source the data used here, to make it extra-accessible by the community.
 - 🐝 Training Runs, [here](https://wandb.ai/francescocapuano/scRNA-VAE/overview)
 - 🤗 Data, [fracapuano/scRNA](https://huggingface.co/fracapuano/datasets/scRNA).
 
+## Project Structure
+```bash
+minivae/                     # Main package directory
+│
+├── models/                  # Neural network architectures and probability distros
+│   ├── vae.py               # Base VAE implementation
+│   ├── gmvae.py             # Gaussian Mixture VAE implementation
+│   ├── decoder.py           # Decoder architectures
+│   └── distributions.py     # Custom probability distributions, Zero-Inflated
+│
+├── utils/                   # Helper functions and utilities
+│   ├── dataset.py           # Data loading and dataset creation for scRNA data
+│   └── loss.py              # Loss functions for VAE and GMVAE training
+│
+configs/                     # Training configuration files
+│   ├── train_vae.yaml       # Configuration for vanilla VAE training
+│   └── train_gmvae.yaml     # Configuration for Gaussian Mixture VAE training
+│
+├── train.py                 # Main training script with training loops and validation
+└── setup_env.sh             # Script for easy environment setup on GPU machines of the env
+```
 
 ## Key Features
 
